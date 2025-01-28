@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 export default function StarRating({ length }) {
     const starContainer = {
         display: "flex",
@@ -6,10 +8,12 @@ export default function StarRating({ length }) {
     };
 
     const starStyle = {
-        width: "16px",
-        height: "16px",
+        width: "18px",
+        height: "18px",
         cursor: "pointer",
     };
+
+    const [currentRating, setCurrentRating] = useState(0);
 
     return (
         <div style={starContainer}>
@@ -22,6 +26,7 @@ export default function StarRating({ length }) {
                         stroke="#fcc419"
                         style={starStyle}
                         role="button"
+                        onClick={() => setCurrentRating(i + 1)}
                     >
                         <path
                             strokeLinecap="round"
@@ -32,7 +37,7 @@ export default function StarRating({ length }) {
                     </svg>
                 </>
             ))}
-            {length}
+            <p>{currentRating || ""}</p>
         </div>
     );
 }
