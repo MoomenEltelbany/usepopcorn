@@ -57,7 +57,7 @@ export default function App() {
             try {
                 setIsLoading(true);
                 const response = await fetch(
-                    `http://www.omdbapi.com/?apikey=${KEY}&s=intersllar`
+                    `http://www.omdbapi.com/?apikey=${KEY}&s=interstellar`
                 );
                 const data = await response.json();
 
