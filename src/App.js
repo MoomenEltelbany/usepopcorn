@@ -49,11 +49,30 @@ const KEY = "332bbfcc";
 
 export default function App() {
     const [movies, setMovies] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState("");
 
     useEffect(function () {
-        fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=interstellar`)
-            .then((data) => data.json())
-            .then((res) => setMovies(res.Search));
+        async function fetchingMovies() {
+            try {
+                setIsLoading(true);
+                const response = await fetch(
+                    `http://www.omdbapi.com/?apikey=${KEY}&s=intersllar`
+                );
+                const data = await response.json();
+
+                if (data.Response === "False")
+                    throw new Error("Unable to fetch this movie");
+
+                setMovies(data.Search);
+            } catch (error) {
+                setError(error);
+            } finally {
+                setIsLoading(false);
+            }
+        }
+
+        fetchingMovies();
     }, []);
 
     return (
@@ -61,9 +80,32 @@ export default function App() {
             <NavBar movies={movies}>
                 <NumResults movies={movies} />
             </NavBar>
-            <Main movies={movies} />
+            <Main>
+                <MoviesList movies={movies}>
+                    <Box>
+                        {isLoading && <Loader />}
+                        {error && <ErrorMessage message={error.message} />}
+                        {!error && movies.length > 0 && (
+                            <ul className="list list-movies">
+                                {movies.map((movie) => (
+                                    <Movies movie={movie} key={movie.imdbID} />
+                                ))}
+                            </ul>
+                        )}
+                    </Box>
+                </MoviesList>
+                <WatchedMovies movies={movies} />
+            </Main>
         </>
     );
+}
+
+function ErrorMessage({ message }) {
+    return <p className="error">🛑 {message}</p>;
+}
+
+function Loader() {
+    return <p className="loader">Loading...</p>;
 }
 
 function NavBar({ children }) {
@@ -106,25 +148,12 @@ function NumResults({ movies }) {
     );
 }
 
-function Main({ movies }) {
-    return (
-        <main className="main">
-            <MoviesList movies={movies} />
-            <WatchedMovies movies={movies} />
-        </main>
-    );
+function Main({ children }) {
+    return <main className="main">{children}</main>;
 }
 
-function MoviesList({ movies }) {
-    return (
-        <Box>
-            <ul className="list list-movies">
-                {movies.map((movie) => (
-                    <Movies movie={movie} key={movie.imdbID} />
-                ))}
-            </ul>
-        </Box>
-    );
+function MoviesList({ children }) {
+    return <>{children}</>;
 }
 
 function Movies({ movie }) {
