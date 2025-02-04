@@ -51,6 +51,7 @@ export default function App() {
     const [movies, setMovies] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
+    const [selectedMovie, setSelectedMovie] = useState("");
 
     useEffect(function () {
         async function fetchingMovies() {
@@ -75,6 +76,11 @@ export default function App() {
         fetchingMovies();
     }, []);
 
+    function handleSelectedMovie(id) {
+        setSelectedMovie(id);
+        console.log(selectedMovie);
+    }
+
     return (
         <>
             <NavBar movies={movies}>
@@ -88,7 +94,11 @@ export default function App() {
                         {!error && movies.length > 0 && (
                             <ul className="list list-movies">
                                 {movies.map((movie) => (
-                                    <Movies movie={movie} key={movie.imdbID} />
+                                    <Movies
+                                        movie={movie}
+                                        key={movie.imdbID}
+                                        onSelectMovie={handleSelectedMovie}
+                                    />
                                 ))}
                             </ul>
                         )}
@@ -156,9 +166,9 @@ function MoviesList({ children }) {
     return <>{children}</>;
 }
 
-function Movies({ movie }) {
+function Movies({ movie, onSelectMovie }) {
     return (
-        <li>
+        <li onClick={() => onSelectMovie(movie.imdbID)}>
             <img src={movie.Poster} alt={`${movie.Title} poster`} />
             <h3>{movie.Title}</h3>
             <div>
@@ -172,7 +182,6 @@ function Movies({ movie }) {
 }
 
 function WatchedMovies() {
-    // const [isOpen2, setIsOpen2] = useState(true);
     const [watched, setWatched] = useState(tempWatchedData);
 
     return (
