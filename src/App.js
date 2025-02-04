@@ -49,9 +49,11 @@ const KEY = "332bbfcc";
 
 export default function App() {
     const [movies, setMovies] = useState([]);
+    const [watched, setWatched] = useState(tempWatchedData);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
-    const [selectedMovie, setSelectedMovie] = useState("");
+    const [selectedMovie, setSelectedMovie] = useState(null);
+    const [isSelectedMovieShown, setIsSelectedMovieShown] = useState(false);
 
     useEffect(function () {
         async function fetchingMovies() {
@@ -78,6 +80,7 @@ export default function App() {
 
     function handleSelectedMovie(id) {
         setSelectedMovie(id);
+        setIsSelectedMovieShown((shown) => !shown);
         console.log(selectedMovie);
     }
 
@@ -104,7 +107,26 @@ export default function App() {
                         )}
                     </Box>
                 </MoviesList>
-                <WatchedMovies movies={movies} />
+                <WatchedMovies movies={movies}>
+                    <Box>
+                        {isSelectedMovieShown ? (
+                            <MovieDetails id={selectedMovie} />
+                        ) : (
+                            <>
+                                <Summary watched={watched} />
+
+                                <ul className="list">
+                                    {watched.map((movie) => (
+                                        <WatchedMovieItem
+                                            movie={movie}
+                                            key={movie.imdbID}
+                                        />
+                                    ))}
+                                </ul>
+                            </>
+                        )}
+                    </Box>
+                </WatchedMovies>
             </Main>
         </>
     );
@@ -181,20 +203,10 @@ function Movies({ movie, onSelectMovie }) {
     );
 }
 
-function WatchedMovies() {
-    const [watched, setWatched] = useState(tempWatchedData);
+function WatchedMovies({ children }) {
+    // const [watched, setWatched] = useState(tempWatchedData);
 
-    return (
-        <Box>
-            <Summary watched={watched} />
-
-            <ul className="list">
-                {watched.map((movie) => (
-                    <WatchedMovieItem movie={movie} key={movie.imdbID} />
-                ))}
-            </ul>
-        </Box>
-    );
+    return <>{children}</>;
 }
 
 function Box({ children }) {
@@ -264,3 +276,93 @@ function WatchedMovieItem({ movie }) {
         </li>
     );
 }
+
+function MovieDetails({ id }) {
+    const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(function () {
+        async function fetchingMovies() {
+            try {
+                setIsLoading(true);
+                const response = await fetch(
+                    `http://www.omdbapi.com/?apikey=${KEY}&i=${id}`
+                );
+                const data = await response.json();
+                console.log(data);
+
+                if (data.Response === "False")
+                    throw new Error("Unable to fetch this movie");
+            } catch (error) {
+            } finally {
+                setIsLoading(false);
+            }
+        }
+
+        fetchingMovies();
+    }, []);
+
+    return (
+        <div className="details">
+            {/* {isLoading ? (
+                <Loader />
+            ) : (
+                <>
+                    <header>
+                        <button className="btn-back" onClick={onCloseMovie}>
+                            &larr;
+                        </button>
+                        <img src={poster} alt={`Poster of ${movie} movie`} />
+                        <div className="details-overview">
+                            <h2>{title}</h2>
+                            <p>
+                                {released} &bull; {runtime}
+                            </p>
+                            <p>{genre}</p>
+                            <p>
+                                <span>⭐️</span>
+                                {imdbRating} IMDb rating
+                            </p>
+                        </div>
+                    </header>
+
+                    <section>
+                        <div className="rating">
+                            {!isWatched ? (
+                                <>
+                                    <StarRating
+                                        maxRating={10}
+                                        size={24}
+                                        onSetRating={setUserRating}
+                                    />
+                                    {userRating > 0 && (
+                                        <button
+                                            className="btn-add"
+                                            onClick={handleAdd}
+                                        >
+                                            + Add to list
+                                        </button>
+                                    )}
+                                </>
+                            ) : (
+                                <p>
+                                    You rated with movie {watchedUserRating}{" "}
+                                    <span>⭐️</span>
+                                </p>
+                            )}
+                        </div>
+                        <p>
+                            <em>{plot}</em>
+                        </p>
+                        <p>Starring {actors}</p>
+                        <p>Directed by {director}</p>
+                    </section>
+                </>
+            )} */}
+        </div>
+    );
+}
+
+// #Continue with the MovieDetails:
+// ! 1- Handle the Success and change the variable names
+// ! 2- Start showing the chosen movie details in the WatchedMovies section
+// ! 3- Put the StarRating component inside
