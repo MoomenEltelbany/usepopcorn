@@ -251,15 +251,15 @@ function Summary({ watched }) {
                 </p>
                 <p>
                     <span>⭐️</span>
-                    <span>{avgImdbRating}</span>
+                    <span>{Number(avgImdbRating.toFixed(2))}</span>
                 </p>
                 <p>
                     <span>🌟</span>
-                    <span>{avgUserRating}</span>
+                    <span>{Number(avgUserRating.toFixed(2))}</span>
                 </p>
                 <p>
                     <span>⏳</span>
-                    <span>{avgRuntime} min</span>
+                    <span>{avgRuntime.toFixed(2)} min</span>
                 </p>
             </div>
         </div>
@@ -269,7 +269,7 @@ function Summary({ watched }) {
 function WatchedMovieItem({ movie }) {
     return (
         <li key={movie.imdbID}>
-            <img src={movie.Poster} alt={`${movie.Title} poster`} />
+            <img src={movie.poster} alt={`${movie.Title} poster`} />
             <h3>{movie.Title}</h3>
             <div>
                 <p>
@@ -292,6 +292,7 @@ function WatchedMovieItem({ movie }) {
 function MovieDetails({ id, onClearWatchedMovie, onAddWatchedMovie }) {
     const [isLoading, setIsLoading] = useState(false);
     const [movie, setMovie] = useState(null);
+    const [userRating, setUserRating] = useState("");
 
     useEffect(() => {
         async function fetchMovieDetails() {
@@ -332,6 +333,19 @@ function MovieDetails({ id, onClearWatchedMovie, onAddWatchedMovie }) {
         Genre: genre,
     } = movie;
 
+    function addMovie() {
+        const newMovie = {
+            imdbRating,
+            runtime: Number(runtime.split(" ").at(0)),
+            poster,
+            userRating,
+            imdbID: movie.imdbID,
+        };
+
+        onAddWatchedMovie(newMovie);
+        onClearWatchedMovie(false);
+    }
+
     return (
         <div className="details">
             <header>
@@ -355,11 +369,8 @@ function MovieDetails({ id, onClearWatchedMovie, onAddWatchedMovie }) {
             </header>
             <section>
                 <div className="rating">
-                    <StarRating length={10} />
-                    <button
-                        className="btn-add"
-                        onClick={() => onAddWatchedMovie(movie)}
-                    >
+                    <StarRating length={10} onUserRating={setUserRating} />
+                    <button className="btn-add" onClick={addMovie}>
                         + Add movie to the list
                     </button>
                 </div>

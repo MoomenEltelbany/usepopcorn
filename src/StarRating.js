@@ -12,12 +12,13 @@ const starStyle = {
     cursor: "pointer",
 };
 
-export default function StarRating({ length }) {
+export default function StarRating({ length, onUserRating }) {
     const [currentRating, setCurrentRating] = useState(0);
     const [tempRating, setTempRating] = useState(null);
 
     function handleCurrentRating(index) {
         setCurrentRating(index);
+        onUserRating(index);
     }
 
     function handleTempRating(index) {
