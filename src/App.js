@@ -50,7 +50,7 @@ const KEY = "332bbfcc";
 
 export default function App() {
     const [movies, setMovies] = useState([]);
-    const [watched, setWatched] = useState(tempWatchedData);
+    const [watched, setWatched] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
     const [selectedMovie, setSelectedMovie] = useState(null);
@@ -351,6 +351,7 @@ function MovieDetails({ id, onClearWatchedMovie }) {
             <section>
                 <div className="rating">
                     <StarRating length={10} />
+                    <button className="btn-add">+ Add movie to the list</button>
                 </div>
                 <p>
                     <em>{plot}</em>
