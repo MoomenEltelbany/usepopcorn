@@ -383,3 +383,6 @@ function MovieDetails({ id, onClearWatchedMovie, onAddWatchedMovie }) {
         </div>
     );
 }
+
+// TODO: 1- If the movie is in the list, don't allow the user to rate it again
+// TODO: 2- Show a message in case if the movie was already rated
