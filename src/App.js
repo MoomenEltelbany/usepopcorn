@@ -80,7 +80,7 @@ export default function App() {
     }, []);
 
     function handleSelectedMovie(id) {
-        setSelectedMovie((curr) => (curr === id ? curr : id));
+        setSelectedMovie(id);
         setIsSelectedMovieShown(true);
     }
 
@@ -361,8 +361,3 @@ function MovieDetails({ id, onClearWatchedMovie }) {
         </div>
     );
 }
-
-// #Continue with the MovieDetails:
-// ! 1- Handle the Success and change the variable names
-// ! 2- Start showing the chosen movie details in the WatchedMovies section
-// ! 3- Put the StarRating component inside
