@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import StarRating from "./StarRating";
 
 const tempMovieData = [
     {
@@ -279,38 +280,54 @@ function WatchedMovieItem({ movie }) {
 
 function MovieDetails({ id }) {
     const [isLoading, setIsLoading] = useState(false);
+    const [movie, setMovie] = useState(null);
 
-    useEffect(function () {
-        async function fetchingMovies() {
-            try {
-                setIsLoading(true);
-                const response = await fetch(
-                    `http://www.omdbapi.com/?apikey=${KEY}&i=${id}`
-                );
-                const data = await response.json();
-                console.log(data);
+    const {
+        Title: title,
+        Year: year,
+        Poster: poster,
+        Runtime: runtime,
+        imdbRating,
+        Plot: plot,
+        Released: released,
+        Actors: actors,
+        Director: director,
+        Genre: genre,
+    } = movie;
 
-                if (data.Response === "False")
-                    throw new Error("Unable to fetch this movie");
-            } catch (error) {
-            } finally {
-                setIsLoading(false);
+    useEffect(
+        function () {
+            async function fetchingMovies() {
+                try {
+                    setIsLoading(true);
+                    const response = await fetch(
+                        `http://www.omdbapi.com/?apikey=${KEY}&i=${id}`
+                    );
+                    const data = await response.json();
+                    console.log(data);
+                    setMovie(movie);
+
+                    if (data.Response === "False")
+                        throw new Error("Unable to fetch this movie");
+                } catch (error) {
+                } finally {
+                    setIsLoading(false);
+                }
             }
-        }
 
-        fetchingMovies();
-    }, []);
+            fetchingMovies();
+        },
+        [id, movie]
+    );
 
     return (
         <div className="details">
-            {/* {isLoading ? (
+            {isLoading ? (
                 <Loader />
             ) : (
                 <>
                     <header>
-                        <button className="btn-back" onClick={onCloseMovie}>
-                            &larr;
-                        </button>
+                        <button className="btn-back">&larr;</button>
                         <img src={poster} alt={`Poster of ${movie} movie`} />
                         <div className="details-overview">
                             <h2>{title}</h2>
@@ -324,31 +341,9 @@ function MovieDetails({ id }) {
                             </p>
                         </div>
                     </header>
-
                     <section>
                         <div className="rating">
-                            {!isWatched ? (
-                                <>
-                                    <StarRating
-                                        maxRating={10}
-                                        size={24}
-                                        onSetRating={setUserRating}
-                                    />
-                                    {userRating > 0 && (
-                                        <button
-                                            className="btn-add"
-                                            onClick={handleAdd}
-                                        >
-                                            + Add to list
-                                        </button>
-                                    )}
-                                </>
-                            ) : (
-                                <p>
-                                    You rated with movie {watchedUserRating}{" "}
-                                    <span>⭐️</span>
-                                </p>
-                            )}
+                            <StarRating maxRating={10} />
                         </div>
                         <p>
                             <em>{plot}</em>
@@ -357,7 +352,7 @@ function MovieDetails({ id }) {
                         <p>Directed by {director}</p>
                     </section>
                 </>
-            )} */}
+            )}
         </div>
     );
 }
