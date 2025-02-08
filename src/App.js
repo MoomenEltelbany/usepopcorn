@@ -88,6 +88,10 @@ export default function App() {
         setIsSelectedMovieShown(false);
     }
 
+    function handleAddWatchedMovie(movie) {
+        setWatched([...watched, movie]);
+    }
+
     return (
         <>
             <NavBar movies={movies}>
@@ -117,6 +121,7 @@ export default function App() {
                             <MovieDetails
                                 id={selectedMovie}
                                 onClearWatchedMovie={handleClearWatchedMovie}
+                                onAddWatchedMovie={handleAddWatchedMovie}
                             />
                         ) : (
                             <>
@@ -284,7 +289,7 @@ function WatchedMovieItem({ movie }) {
     );
 }
 
-function MovieDetails({ id, onClearWatchedMovie }) {
+function MovieDetails({ id, onClearWatchedMovie, onAddWatchedMovie }) {
     const [isLoading, setIsLoading] = useState(false);
     const [movie, setMovie] = useState(null);
 
@@ -351,7 +356,12 @@ function MovieDetails({ id, onClearWatchedMovie }) {
             <section>
                 <div className="rating">
                     <StarRating length={10} />
-                    <button className="btn-add">+ Add movie to the list</button>
+                    <button
+                        className="btn-add"
+                        onClick={() => onAddWatchedMovie(movie)}
+                    >
+                        + Add movie to the list
+                    </button>
                 </div>
                 <p>
                     <em>{plot}</em>
