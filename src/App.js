@@ -80,9 +80,12 @@ export default function App() {
     }, []);
 
     function handleSelectedMovie(id) {
-        setSelectedMovie(id);
-        setIsSelectedMovieShown((shown) => !shown);
-        console.log(selectedMovie);
+        setSelectedMovie((curr) => (curr === id ? curr : id));
+        setIsSelectedMovieShown(true);
+    }
+
+    function handleClearWatchedMovie() {
+        setIsSelectedMovieShown(false);
     }
 
     return (
@@ -111,7 +114,10 @@ export default function App() {
                 <WatchedMovies movies={movies}>
                     <Box>
                         {isSelectedMovieShown ? (
-                            <MovieDetails id={selectedMovie} />
+                            <MovieDetails
+                                id={selectedMovie}
+                                onClearWatchedMovie={handleClearWatchedMovie}
+                            />
                         ) : (
                             <>
                                 <Summary watched={watched} />
@@ -278,9 +284,35 @@ function WatchedMovieItem({ movie }) {
     );
 }
 
-function MovieDetails({ id }) {
+function MovieDetails({ id, onClearWatchedMovie }) {
     const [isLoading, setIsLoading] = useState(false);
     const [movie, setMovie] = useState(null);
+
+    useEffect(() => {
+        async function fetchMovieDetails() {
+            try {
+                setIsLoading(true);
+                const response = await fetch(
+                    `http://www.omdbapi.com/?apikey=${KEY}&i=${id}`
+                );
+                const data = await response.json();
+
+                if (data.Response === "False")
+                    throw new Error("Movie not found");
+
+                setMovie(data);
+            } catch (error) {
+                console.error("Error fetching movie:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        }
+
+        fetchMovieDetails();
+    }, [id]);
+
+    if (isLoading) return <Loader />;
+    if (!movie) return <p>Loading movie details...</p>;
 
     const {
         Title: title,
@@ -295,64 +327,37 @@ function MovieDetails({ id }) {
         Genre: genre,
     } = movie;
 
-    useEffect(
-        function () {
-            async function fetchingMovies() {
-                try {
-                    setIsLoading(true);
-                    const response = await fetch(
-                        `http://www.omdbapi.com/?apikey=${KEY}&i=${id}`
-                    );
-                    const data = await response.json();
-                    console.log(data);
-                    setMovie(movie);
-
-                    if (data.Response === "False")
-                        throw new Error("Unable to fetch this movie");
-                } catch (error) {
-                } finally {
-                    setIsLoading(false);
-                }
-            }
-
-            fetchingMovies();
-        },
-        [id, movie]
-    );
-
     return (
         <div className="details">
-            {isLoading ? (
-                <Loader />
-            ) : (
-                <>
-                    <header>
-                        <button className="btn-back">&larr;</button>
-                        <img src={poster} alt={`Poster of ${movie} movie`} />
-                        <div className="details-overview">
-                            <h2>{title}</h2>
-                            <p>
-                                {released} &bull; {runtime}
-                            </p>
-                            <p>{genre}</p>
-                            <p>
-                                <span>⭐️</span>
-                                {imdbRating} IMDb rating
-                            </p>
-                        </div>
-                    </header>
-                    <section>
-                        <div className="rating">
-                            <StarRating maxRating={10} />
-                        </div>
-                        <p>
-                            <em>{plot}</em>
-                        </p>
-                        <p>Starring {actors}</p>
-                        <p>Directed by {director}</p>
-                    </section>
-                </>
-            )}
+            <header>
+                <button
+                    className="btn-back"
+                    onClick={() => onClearWatchedMovie()}
+                >
+                    &larr;
+                </button>
+                <img src={poster} alt={`Poster of ${title} movie`} />
+                <div className="details-overview">
+                    <h2>{title}</h2>
+                    <p>
+                        {released} &bull; {runtime}
+                    </p>
+                    <p>{genre}</p>
+                    <p>
+                        <span>⭐️</span> {imdbRating} IMDb rating
+                    </p>
+                </div>
+            </header>
+            <section>
+                <div className="rating">
+                    <StarRating length={10} />
+                </div>
+                <p>
+                    <em>{plot}</em>
+                </p>
+                <p>Starring {actors}</p>
+                <p>Directed by {director}</p>
+            </section>
         </div>
     );
 }
