@@ -270,7 +270,7 @@ function WatchedMovieItem({ movie }) {
     return (
         <li key={movie.imdbID}>
             <img src={movie.poster} alt={`${movie.Title} poster`} />
-            <h3>{movie.Title}</h3>
+            <h3>{movie.title}</h3>
             <div>
                 <p>
                     <span>⭐️</span>
@@ -335,6 +335,7 @@ function MovieDetails({ id, onClearWatchedMovie, onAddWatchedMovie }) {
 
     function addMovie() {
         const newMovie = {
+            title,
             imdbRating,
             runtime: Number(runtime.split(" ").at(0)),
             poster,
