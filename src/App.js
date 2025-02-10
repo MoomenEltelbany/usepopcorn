@@ -122,6 +122,7 @@ export default function App() {
                                 id={selectedMovie}
                                 onClearWatchedMovie={handleClearWatchedMovie}
                                 onAddWatchedMovie={handleAddWatchedMovie}
+                                watched={watched}
                             />
                         ) : (
                             <>
@@ -289,7 +290,7 @@ function WatchedMovieItem({ movie }) {
     );
 }
 
-function MovieDetails({ id, onClearWatchedMovie, onAddWatchedMovie }) {
+function MovieDetails({ id, onClearWatchedMovie, onAddWatchedMovie, watched }) {
     const [isLoading, setIsLoading] = useState(false);
     const [movie, setMovie] = useState(null);
     const [userRating, setUserRating] = useState("");
@@ -347,6 +348,10 @@ function MovieDetails({ id, onClearWatchedMovie, onAddWatchedMovie }) {
         onClearWatchedMovie(false);
     }
 
+    const userRated = watched.some((movie) => movie.imdbID === id);
+
+    const ratedMovie = watched.find((movie) => movie.imdbID === id);
+
     return (
         <div className="details">
             <header>
@@ -369,12 +374,19 @@ function MovieDetails({ id, onClearWatchedMovie, onAddWatchedMovie }) {
                 </div>
             </header>
             <section>
-                <div className="rating">
-                    <StarRating length={10} onUserRating={setUserRating} />
-                    <button className="btn-add" onClick={addMovie}>
-                        + Add movie to the list
-                    </button>
-                </div>
+                {userRated ? (
+                    <p className="rating">
+                        You have rated this movie with {ratedMovie.userRating}
+                        🌟
+                    </p>
+                ) : (
+                    <div className="rating">
+                        <StarRating length={10} onUserRating={setUserRating} />
+                        <button className="btn-add" onClick={addMovie}>
+                            + Add movie to the list
+                        </button>
+                    </div>
+                )}
                 <p>
                     <em>{plot}</em>
                 </p>
@@ -385,5 +397,4 @@ function MovieDetails({ id, onClearWatchedMovie, onAddWatchedMovie }) {
     );
 }
 
-// TODO: 1- If the movie is in the list, don't allow the user to rate it again
 // TODO: 2- Show a message in case if the movie was already rated
