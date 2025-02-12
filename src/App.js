@@ -224,8 +224,6 @@ function Movies({ movie, onSelectMovie }) {
 }
 
 function WatchedMovies({ children }) {
-    // const [watched, setWatched] = useState(tempWatchedData);
-
     return <>{children}</>;
 }
 
@@ -330,6 +328,15 @@ function MovieDetails({ id, onClearWatchedMovie, onAddWatchedMovie, watched }) {
 
         fetchMovieDetails();
     }, [id]);
+
+    useEffect(
+        function () {
+            if (!movie?.Title) return;
+
+            document.title = `Movie | ${movie.Title}`;
+        },
+        [movie?.Title]
+    );
 
     if (isLoading) return <Loader />;
     if (!movie) return <p>Loading movie details...</p>;
