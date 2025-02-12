@@ -92,6 +92,10 @@ export default function App() {
         setWatched([...watched, movie]);
     }
 
+    function handleDeleteWatchedMovie(id) {
+        setWatched((movies) => movies.filter((movie) => movie.imdbID !== id));
+    }
+
     return (
         <>
             <NavBar movies={movies}>
@@ -133,6 +137,9 @@ export default function App() {
                                         <WatchedMovieItem
                                             movie={movie}
                                             key={movie.imdbID}
+                                            onDeleteWatchedMovie={
+                                                handleDeleteWatchedMovie
+                                            }
                                         />
                                     ))}
                                 </ul>
@@ -267,7 +274,7 @@ function Summary({ watched }) {
     );
 }
 
-function WatchedMovieItem({ movie }) {
+function WatchedMovieItem({ movie, onDeleteWatchedMovie }) {
     return (
         <li key={movie.imdbID}>
             <img src={movie.poster} alt={`${movie.Title} poster`} />
@@ -285,7 +292,12 @@ function WatchedMovieItem({ movie }) {
                     <span>⏳</span>
                     <span>{movie.runtime} min</span>
                 </p>
-                <button className="btn-delete">X</button>
+                <button
+                    className="btn-delete"
+                    onClick={() => onDeleteWatchedMovie(movie.imdbID)}
+                >
+                    X
+                </button>
             </div>
         </li>
     );
@@ -397,5 +409,3 @@ function MovieDetails({ id, onClearWatchedMovie, onAddWatchedMovie, watched }) {
         </div>
     );
 }
-
-// TODO: 2- Show a message in case if the movie was already rated
