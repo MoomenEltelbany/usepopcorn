@@ -52,32 +52,54 @@ export default function App() {
     const [movies, setMovies] = useState([]);
     const [watched, setWatched] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState("");
+    const [error, setError] = useState(null); // ✅ Set error as null initially
     const [selectedMovie, setSelectedMovie] = useState(null);
     const [isSelectedMovieShown, setIsSelectedMovieShown] = useState(false);
+    const [query, setQuery] = useState("");
 
-    useEffect(function () {
+    useEffect(() => {
+        if (!query) {
+            setMovies([]);
+            return;
+        }
+
+        const controller = new AbortController();
+
         async function fetchingMovies() {
             try {
                 setIsLoading(true);
+                setError(null); //
+
                 const response = await fetch(
-                    `http://www.omdbapi.com/?apikey=${KEY}&s=interstellar`
+                    `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`,
+                    { signal: controller.signal }
                 );
+
+                if (!response.ok) throw new Error("Failed to fetch movies");
+
                 const data = await response.json();
 
                 if (data.Response === "False")
-                    throw new Error("Unable to fetch this movie");
+                    throw new Error("No movies found");
 
                 setMovies(data.Search);
             } catch (error) {
-                setError(error);
+                if (error.name !== "AbortError") {
+                    setError(
+                        error instanceof Error
+                            ? error
+                            : new Error(String(error))
+                    ); // ✅ Ensure error is an instance of Error
+                }
             } finally {
                 setIsLoading(false);
             }
         }
 
         fetchingMovies();
-    }, []);
+
+        return () => controller.abort();
+    }, [query]);
 
     function handleSelectedMovie(id) {
         setSelectedMovie(id);
@@ -89,23 +111,26 @@ export default function App() {
     }
 
     function handleAddWatchedMovie(movie) {
-        setWatched([...watched, movie]);
+        setWatched((prevWatched) => [...prevWatched, movie]);
     }
 
     function handleDeleteWatchedMovie(id) {
-        setWatched((movies) => movies.filter((movie) => movie.imdbID !== id));
+        setWatched((prevMovies) =>
+            prevMovies.filter((movie) => movie.imdbID !== id)
+        );
     }
 
     return (
         <>
-            <NavBar movies={movies}>
+            <NavBar movies={movies} query={query} setQuery={setQuery}>
                 <NumResults movies={movies} />
             </NavBar>
             <Main>
                 <MoviesList movies={movies}>
                     <Box>
                         {isLoading && <Loader />}
-                        {error && <ErrorMessage message={error.message} />}
+                        {error && <ErrorMessage message={error.message} />}{" "}
+                        {/* ✅ Ensure error.message exists */}
                         {!error && movies.length > 0 && (
                             <ul className="list list-movies">
                                 {movies.map((movie) => (
@@ -131,7 +156,6 @@ export default function App() {
                         ) : (
                             <>
                                 <Summary watched={watched} />
-
                                 <ul className="list">
                                     {watched.map((movie) => (
                                         <WatchedMovieItem
@@ -160,11 +184,11 @@ function Loader() {
     return <p className="loader">Loading...</p>;
 }
 
-function NavBar({ children }) {
+function NavBar({ children, query, setQuery }) {
     return (
         <nav className="nav-bar">
             <Logo />
-            <InputSearch />
+            <InputSearch query={query} setQuery={setQuery} />
             {children}
         </nav>
     );
@@ -179,8 +203,7 @@ function Logo() {
     );
 }
 
-function InputSearch() {
-    const [query, setQuery] = useState("");
+function InputSearch({ query, setQuery }) {
     return (
         <input
             className="search"
@@ -334,6 +357,10 @@ function MovieDetails({ id, onClearWatchedMovie, onAddWatchedMovie, watched }) {
             if (!movie?.Title) return;
 
             document.title = `Movie | ${movie.Title}`;
+
+            return function () {
+                document.title = "usePopcorn";
+            };
         },
         [movie?.Title]
     );
