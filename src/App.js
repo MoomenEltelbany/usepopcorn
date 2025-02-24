@@ -50,7 +50,11 @@ const KEY = "332bbfcc";
 
 export default function App() {
     const [movies, setMovies] = useState([]);
-    const [watched, setWatched] = useState([]);
+    const [watched, setWatched] = useState(function () {
+        const storedValue = JSON.parse(localStorage.getItem("watched"));
+
+        return storedValue;
+    });
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [selectedMovie, setSelectedMovie] = useState(null);
@@ -119,6 +123,13 @@ export default function App() {
             prevMovies.filter((movie) => movie.imdbID !== id)
         );
     }
+
+    useEffect(
+        function () {
+            localStorage.setItem("watched", JSON.stringify(watched));
+        },
+        [watched]
+    );
 
     return (
         <>
